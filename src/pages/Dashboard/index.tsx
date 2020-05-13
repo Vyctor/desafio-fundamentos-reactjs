@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import income from '../../assets/income.svg';
 import outcome from '../../assets/outcome.svg';
@@ -36,12 +36,17 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadTransactions(): Promise<void> {
-      const response = await api.get('transactions');
+      const { data: response } = await api.get('/transactions');
 
-      setTransactions(response.data.transactions);
-      setBalance(response.data.balance);
+      setTransactions(
+        response.transactions.map((t: Transaction) => ({
+          ...t,
+          formattedValue: formatValue(t.value),
+          formattedDate: formatDate(t.created_at),
+        })),
+      );
+      setBalance(response.balance);
     }
-
     loadTransactions();
   }, []);
 
